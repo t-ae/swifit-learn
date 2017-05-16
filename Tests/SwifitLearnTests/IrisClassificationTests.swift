@@ -38,7 +38,7 @@ class IrisClassificationTests: XCTestCase {
     }
     
     func testKNN() {
-        let classifier = KNNClassifier(k: 1)
+        let classifier = KNeighborClassifier(k: 1)
         
         classifier.fit(x: Iris.x_train,
                        y: Iris.y_train.elements().map { Int($0) })

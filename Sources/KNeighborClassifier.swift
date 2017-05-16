@@ -1,7 +1,7 @@
 
 import NDArray
 
-class KNNClassifier {
+class KNeighborClassifier {
     
     let k: Int
     
