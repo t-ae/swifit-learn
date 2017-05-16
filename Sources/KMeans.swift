@@ -35,7 +35,10 @@ public class KMeans {
                 var max = Float.infinity
                 var maxIndex = -1
                 for i in 0..<k {
-                    let distance = norm(centers[i]! - x)
+                    guard let center = centers[i] else {
+                        continue
+                    }
+                    let distance = norm(center - x)
                     if distance < max {
                         max = distance
                         maxIndex = i
@@ -49,7 +52,11 @@ public class KMeans {
             for i in 0..<k {
                 let mask = indices.map { $0 == i }
                 bucket[i] = x.select(mask)
-                centers[i] = mean(bucket[i]!, along: 0)
+                if bucket[i]!.shape[0] == 0 {
+                    centers[i] = nil
+                } else {
+                    centers[i] = mean(bucket[i]!, along: 0)
+                }
             }
             lastIndices = indices
         }
@@ -67,7 +74,10 @@ public class KMeans {
             var max = Float.infinity
             var maxIndex = -1
             for i in 0..<k {
-                let distance = norm(centers[i]! - x)
+                guard let center = centers[i] else {
+                    continue
+                }
+                let distance = norm(center - x)
                 if distance < max {
                     max = distance
                     maxIndex = i
