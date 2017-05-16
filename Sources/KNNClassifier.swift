@@ -36,10 +36,7 @@ class KNNClassifier {
         
         return x.map { x in
             let distances = norm(sampleX - x, along: 1)
-            let indices = distances.enumerated()
-                .sorted { l, r in l.element.asScalar() < r.element.asScalar() }
-                .map { $0.offset }
-                .prefix(k)
+            let indices = argsort(distances).prefix(k)
             let answers = indices.map { sampleY[$0] }
             return answers.mode()
         }

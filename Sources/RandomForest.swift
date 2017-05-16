@@ -92,7 +92,7 @@ class Node {
             return
         }
         
-        let divisionFeature = Int(arc4random_uniform(UInt32(x.shape[1])))
+        let divisionFeature = uniform(x.shape[1])
         self.divisionFeature = divisionFeature
         
         let candidates = x[nil, divisionFeature].elements()
