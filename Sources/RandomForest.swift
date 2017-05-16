@@ -38,6 +38,7 @@ public class RandomForestClassifier {
     }
     
     public func predict(x: NDArray) -> [Int] {
+        precondition(x.ndim == 2)
         precondition(x.shape[1] == numFeatures)
         return x.map { x in
             var bins = [Int: Int]()
