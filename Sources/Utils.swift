@@ -12,7 +12,7 @@ func uniform(low: Int, high: Int) -> Int {
 }
 
 func argsort(_ arg: NDArray) -> [Int] {
-    precondition(arg.ndim == 1 || (arg.ndim == 2 && arg.shape[1] == 1))
+    precondition(arg.ndim == 1)
     return arg.enumerated()
         .sorted { l, r in l.element.asScalar() < r.element.asScalar() }
         .map { $0.offset }

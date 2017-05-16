@@ -46,12 +46,12 @@ public class KMeans {
             guard lastIndices != indices else {
                 break
             }
-            lastIndices = indices
             for i in 0..<k {
                 let mask = indices.map { $0 == i }
                 bucket[i] = x.select(mask)
                 centers[i] = mean(bucket[i]!, along: 0)
             }
+            lastIndices = indices
         }
         self.centers = centers
         return lastIndices
