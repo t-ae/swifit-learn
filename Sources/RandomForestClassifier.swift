@@ -40,9 +40,12 @@ public class RandomForestClassifier {
     public func predict(x: NDArray) -> [Int] {
         precondition(x.ndim == 2)
         precondition(x.shape[1] == numFeatures)
+        guard let trees = self.trees else {
+            fatalError("Not fitted")
+        }
         return x.map { x in
             var bins = [Int: Int]()
-            for tree in trees! {
+            for tree in trees {
                 let ans = tree.predict(x: x)
                 if bins[ans] == nil {
                     bins[ans] = 0
