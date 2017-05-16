@@ -87,7 +87,7 @@ class IrisClassificationTests: XCTestCase {
             var correct = 0
             for (a, b) in zip(ys, Iris.y_train) {
                 let a = clusterToClass[a]!
-                print(a, b.asScalar())
+                // print(a, b.asScalar())
                 if a == Int(b.asScalar()) {
                     correct += 1
                 }
@@ -99,7 +99,7 @@ class IrisClassificationTests: XCTestCase {
             let ys = km.predict(x: Iris.x_test)
             for (a, b) in zip(ys, Iris.y_test) {
                 let a = clusterToClass[a]!
-                print(a, b.asScalar())
+                // print(a, b.asScalar())
                 if a == Int(b.asScalar()) {
                     correct += 1
                 }
