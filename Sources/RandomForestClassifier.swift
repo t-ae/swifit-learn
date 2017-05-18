@@ -6,20 +6,30 @@ public enum Criterion {
     case gini, entropy
 }
 
+public enum MaxFeatures {
+    case auto
+    case int(Int)
+}
+
 public class RandomForestClassifier {
     
     let numEstimators: Int
     let maxDepth: Int
     let criterion: Criterion
+    let maxFeatures: MaxFeatures
     
     var numFeatures: Int?
     
     var trees: [Node]?
     
-    public init(numEstimators: Int = 10, maxDepth: Int = 2, criterion: Criterion = .gini) {
+    public init(numEstimators: Int = 10,
+                maxDepth: Int = 2,
+                criterion: Criterion = .gini,
+                maxFeatures: MaxFeatures = .auto) {
         self.numEstimators = numEstimators
         self.maxDepth = maxDepth
         self.criterion = criterion
+        self.maxFeatures = maxFeatures
     }
     
     public func fit(x: NDArray, y: [Int]) {
@@ -31,9 +41,18 @@ public class RandomForestClassifier {
         
         let samples = bootstrapSampling(x: x, y: y, numSets: numEstimators)
         
+        let maxFeatures: Int
+        switch self.maxFeatures {
+        case .auto:
+            maxFeatures = Int(sqrt(Double(numFeatures)))
+        case let .int(n):
+            precondition(n > 0)
+            maxFeatures = min(numFeatures, n)
+        }
+        
         self.trees = (0..<numEstimators).map { i in Node(x: samples[i].x, y: samples[i].y, criterion: criterion) }
         DispatchQueue.concurrentPerform(iterations: numEstimators) { i in
-            self.trees![i].divide(maxDepth: maxDepth)
+            self.trees![i].divide(maxDepth: maxDepth, maxFeatures: maxFeatures)
         }
     }
     
@@ -85,7 +104,7 @@ class Node {
         self.criterion = criterion
     }
     
-    func divide(maxDepth: Int) {
+    func divide(maxDepth: Int, maxFeatures: Int) {
         guard y.contains(where: { $0 != y[0] }) else {
             answer = y[0]
             return
@@ -95,44 +114,48 @@ class Node {
             return
         }
         
-        let divisionFeature = uniform(x.shape[1])
-        self.divisionFeature = divisionFeature
-        
-        let candidates = x[nil, divisionFeature].elements()
+        let featureCandidates = [Int](0..<x.shape[1]).shuffled().prefix(maxFeatures)
         
         var minScore = Float.infinity
+        var divisionFeature = -1
         var divisionBoundary = Float.nan
-        
-        for c in candidates {
-            var lbin = [Int: Int]()
-            var rbin = [Int: Int]()
-            for (sample, gt) in zip(x, y) {
-                if sample[divisionFeature].asScalar() < c {
-                    if lbin[gt] == nil {
-                        lbin[gt] = 0
+        for feature in featureCandidates {
+            let boundaryCandidates = x[nil, feature].elements()
+            
+            for bound in boundaryCandidates {
+                var lbin = [Int: Int]()
+                var rbin = [Int: Int]()
+                for (sample, gt) in zip(x, y) {
+                    if sample[feature].asScalar() < bound {
+                        if lbin[gt] == nil {
+                            lbin[gt] = 0
+                        }
+                        lbin[gt]! += 1
+                    } else {
+                        if rbin[gt] == nil {
+                            rbin[gt] = 0
+                        }
+                        rbin[gt]! += 1
                     }
-                    lbin[gt]! += 1
-                } else {
-                    if rbin[gt] == nil {
-                        rbin[gt] = 0
-                    }
-                    rbin[gt]! += 1
+                }
+                if lbin.isEmpty || rbin.isEmpty {
+                    continue
+                }
+                let score = (calcScore(lbin)*Float(lbin.count) + calcScore(rbin)*Float(rbin.count)) / Float(lbin.count+rbin.count)
+                if minScore > score {
+                    minScore = score
+                    divisionFeature = feature
+                    divisionBoundary = bound
                 }
             }
-            if lbin.isEmpty || rbin.isEmpty {
-                continue
-            }
-            let score = (calcScore(lbin)*Float(lbin.count) + calcScore(rbin)*Float(rbin.count)) / Float(lbin.count+rbin.count)
-            if minScore > score {
-                minScore = score
-                divisionBoundary = c
-            }
         }
-        guard !divisionBoundary.isNaN else {
+        
+        guard divisionFeature != -1 else {
             // every sample has same value
             answer = y.mode()
             return
         }
+        self.divisionFeature = divisionFeature
         self.divisionBoundary = divisionBoundary
         
         let ls = x.enumerated().filter { $1[divisionFeature].asScalar() < divisionBoundary }.map { $0.offset }
@@ -146,8 +169,8 @@ class Node {
         left = Node(x: lx, y: ly, criterion: criterion)
         right = Node(x: rx, y: ry, criterion: criterion)
         
-        left!.divide(maxDepth: maxDepth - 1)
-        right!.divide(maxDepth: maxDepth - 1)
+        left!.divide(maxDepth: maxDepth - 1, maxFeatures: maxFeatures)
+        right!.divide(maxDepth: maxDepth - 1, maxFeatures: maxFeatures)
     }
     
     func calcScore(_ bin: [Int: Int]) -> Float {

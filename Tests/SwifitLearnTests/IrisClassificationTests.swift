@@ -6,7 +6,7 @@ class IrisClassificationTests: XCTestCase {
 
     func testRandomForest() {
         
-        let classifier = RandomForestClassifier(numEstimators: 10, maxDepth: 5, criterion: .gini)
+        let classifier = RandomForestClassifier(numEstimators: 30, maxDepth: 3, criterion: .gini)
         
         classifier.fit(x: Iris.x_train,
                        y: Iris.y_train.elements().map { Int($0) })
