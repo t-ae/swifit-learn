@@ -11,11 +11,17 @@ func uniform(low: Int, high: Int) -> Int {
     return Int(arc4random_uniform(UInt32(high - low))) + low
 }
 
-func argsort(_ arg: NDArray) -> [Int] {
+func argsort(_ arg: NDArray, reversed: Bool = false) -> [Int] {
     precondition(arg.ndim == 1)
-    return arg.enumerated()
-        .sorted { l, r in l.element.asScalar() < r.element.asScalar() }
-        .map { $0.offset }
+    if !reversed {
+        return arg.enumerated()
+            .sorted { l, r in l.element.asScalar() < r.element.asScalar() }
+            .map { $0.offset }
+    } else {
+        return arg.enumerated()
+            .sorted { l, r in l.element.asScalar() >= r.element.asScalar() }
+            .map { $0.offset }
+    }
 }
 
 func shuffle(_ arg: NDArray) -> NDArray {

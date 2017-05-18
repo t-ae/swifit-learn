@@ -38,7 +38,7 @@ class IrisClassificationTests: XCTestCase {
     }
     
     func testKNN() {
-        let classifier = KNeighborClassifier(k: 1)
+        let classifier = KNeighborClassifier(k: 4)
         
         classifier.fit(x: Iris.x_train,
                        y: Iris.y_train.elements().map { Int($0) })
@@ -106,7 +106,56 @@ class IrisClassificationTests: XCTestCase {
             }
             print("accuracy: \(Float(correct) / Float(Iris.y_test.shape[0])) (\(correct)/\(Iris.y_test.shape[0]))")
         }
+    }
+    
+    func testMeanShift() {
+        let ms = MeanShift(bandwidth: 0.85, clusterAll: true)
         
+        let ys = ms.fit(x: Iris.x_train)
+        print("numClusters: \(ms.numClusters!)")
+        
+        var clusterToClass = [Int: Int]()
+        
+        for i in 0..<3 {
+            let bucket = zip(ys, Iris.y_train).flatMap { $0.0 == i ? Int($0.1.asScalar()) : nil }
+            let mode = bucket.mode()
+            print("Cluster \(i), mode: \(mode)")
+            clusterToClass[i] = mode
+        }
+        
+        do {
+            var correct = 0
+            var missing = 0
+            for (a, b) in zip(ys, Iris.y_train) {
+                guard let a = clusterToClass[a] else {
+                    missing += 1
+                    continue
+                }
+                // print(a, b.asScalar())
+                if a == Int(b.asScalar()) {
+                    correct += 1
+                }
+            }
+            print("accuracy: \(Float(correct) / Float(Iris.y_train.shape[0])) (\(correct)/\(Iris.y_train.shape[0]))")
+            print("missing: \(missing)")
+        }
+        do {
+            let ys = ms.predict(x: Iris.x_test)
+            var correct = 0
+            var missing = 0
+            for (a, b) in zip(ys, Iris.y_test) {
+                guard let a = clusterToClass[a] else {
+                    missing += 1
+                    continue
+                }
+                // print(a, b.asScalar())
+                if a == Int(b.asScalar()) {
+                    correct += 1
+                }
+            }
+            print("accuracy: \(Float(correct) / Float(Iris.y_test.shape[0])) (\(correct)/\(Iris.y_test.shape[0]))")
+            print("missing: \(missing)")
+        }
     }
 
 }
