@@ -13,7 +13,7 @@ public class MeanShift {
         return centers?.shape[0]
     }
     
-    public init(bandwidth: Float, maxIter: Int = 300, clusterAll: Bool = false) {
+    public init(bandwidth: Float, maxIter: Int = 300, clusterAll: Bool = true) {
         precondition(bandwidth > 0)
         precondition(maxIter > 0)
         self.bandwidth = bandwidth
