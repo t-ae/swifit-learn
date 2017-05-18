@@ -6,7 +6,7 @@ class IrisClassificationTests: XCTestCase {
 
     func testRandomForest() {
         
-        let classifier = RandomForestClassifier(numEstimators: 30, maxDepth: 3, criterion: .gini)
+        let classifier = RandomForestClassifier(numEstimators: 10, maxDepth: 3, criterion: .gini)
         
         classifier.fit(x: Iris.x_train,
                        y: Iris.y_train.elements().map { Int($0) })
@@ -109,7 +109,7 @@ class IrisClassificationTests: XCTestCase {
     }
     
     func testMeanShift() {
-        let ms = MeanShift(bandwidth: 0.85, clusterAll: true)
+        let ms = MeanShift(bandwidth: 0.86, clusterAll: true)
         
         let ys = ms.fit(x: Iris.x_train)
         print("numClusters: \(ms.numClusters!)")
