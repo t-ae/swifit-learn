@@ -24,6 +24,17 @@ func argsort(_ arg: NDArray, reversed: Bool = false) -> [Int] {
     }
 }
 
+func bincount(_ array: [Int]) -> [Int: Int] {
+    var bin = [Int: Int]()
+    for e in array {
+        if bin[e] == nil {
+            bin[e] = 0
+        }
+        bin[e]! += 1
+    }
+    return bin
+}
+
 func shuffle(_ arg: NDArray) -> NDArray {
     let indices = (0..<arg.shape[0]).map { $0 }
     return arg.select(indices.shuffled())

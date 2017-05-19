@@ -63,17 +63,11 @@ public class RandomForestClassifier {
             fatalError("Not fitted")
         }
         return x.map { x in
-            var bins = [Int: Int]()
-            for tree in trees {
-                let ans = tree.predict(x: x)
-                if bins[ans] == nil {
-                    bins[ans] = 0
-                }
-                bins[ans]! += 1
-            }
+            
+            let bin = bincount(trees.map { $0.predict(x: x) })
             var max = -1
             var ans = -1
-            for (k, v) in bins {
+            for (k, v) in bin {
                 if v > max {
                     max = v
                     ans = k
@@ -123,21 +117,10 @@ class Node {
             let boundaryCandidates = x[nil, feature].elements()
             
             for bound in boundaryCandidates {
-                var lbin = [Int: Int]()
-                var rbin = [Int: Int]()
-                for (sample, gt) in zip(x, y) {
-                    if sample[feature].asScalar() < bound {
-                        if lbin[gt] == nil {
-                            lbin[gt] = 0
-                        }
-                        lbin[gt]! += 1
-                    } else {
-                        if rbin[gt] == nil {
-                            rbin[gt] = 0
-                        }
-                        rbin[gt]! += 1
-                    }
-                }
+                let indices = x[nil, feature].indices { $0.asScalar() < bound }
+                let lbin = bincount(indices.map { y[$0] })
+                let rbin = bincount(Set(0..<y.count).subtracting(Set(indices)).map { y[$0] })
+                
                 if lbin.isEmpty || rbin.isEmpty {
                     continue
                 }
