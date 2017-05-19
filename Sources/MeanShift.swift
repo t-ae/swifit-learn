@@ -39,8 +39,9 @@ public class MeanShift {
             return center
         })
         
-        let d = norm(allCenters.expandDims(0) - x.expandDims(1), along: -1) // numsamples x numcenters
-        let counts = sum(d.clipped(low: bandwidth) / d, along: 0)
+        let d = norm(allCenters.expandDims(1) - x.expandDims(0), along: -1) //  numcenters x numsamples
+        let dd = d - bandwidth
+        let counts = sum(dd.clipped(low: 0) / dd, along: 1)
         
         let sortedCenters = allCenters.select(argsort(counts, reversed: true))
         
