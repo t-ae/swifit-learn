@@ -29,9 +29,7 @@ public class MeanShift {
             var inCircle = NDArray.empty([0])
             
             for _ in 0..<self.maxIter {
-                let newInCircle = x.select { row in
-                    norm(row - center) <= bandwidth
-                }
+                let newInCircle = x.select(norm(x - center, along: 1).indices { $0.asScalar() <= bandwidth })
                 if newInCircle == inCircle {
                     break
                 }
