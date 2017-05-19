@@ -7,7 +7,7 @@ public class KMeans {
     let k: Int
     let numSteps: Int
     
-    var centers: [Int: NDArray]?
+    var centers: NDArray?
     
     public init(k: Int, numSteps: Int = 10) {
         precondition(k > 1)
@@ -21,47 +21,30 @@ public class KMeans {
         precondition(x.shape[0] >= k)
         
         var bucket = [Int: NDArray]()
-        var centers = [Int: NDArray]()
-        var lastIndices: [Int] = []
         
         let xShuffle = shuffle(x)
         for i in 0..<k {
             bucket[i] = xShuffle[i...~>k]
-            centers[i] = mean(bucket[i]!, along: 0)
         }
+        var centers = NDArray.stack(bucket.values.map { mean($0, along: 0) })
+        var lastIndices = NDArray.empty([0])
         
         for _ in 0..<numSteps {
-            let indices = x.map { x -> Int in
-                var max = Float.infinity
-                var maxIndex = -1
-                for i in 0..<k {
-                    guard let center = centers[i] else {
-                        continue
-                    }
-                    let distance = norm(center - x)
-                    if distance < max {
-                        max = distance
-                        maxIndex = i
-                    }
-                }
-                return maxIndex
-            }
+            let ds = norm(centers.expandDims(0) - x.expandDims(1), along: -1)
+            let indices = argmin(ds, along: 1)
+            
             guard lastIndices != indices else {
                 break
             }
             for i in 0..<k {
-                let mask = indices.map { $0 == i }
+                let mask = indices.map { Int($0.asScalar()) == i }
                 bucket[i] = x.select(mask)
-                if bucket[i]!.shape[0] == 0 {
-                    centers[i] = nil
-                } else {
-                    centers[i] = mean(bucket[i]!, along: 0)
-                }
             }
+            centers = NDArray.stack(bucket.values.map { mean($0, along: 0) })
             lastIndices = indices
         }
         self.centers = centers
-        return lastIndices
+        return predict(x: x)
     }
     
     public func predict(x: NDArray) -> [Int] {
@@ -70,21 +53,9 @@ public class KMeans {
             fatalError("Not fitted.")
         }
         
-        let indices = x.map { x -> Int in
-            var max = Float.infinity
-            var maxIndex = -1
-            for i in 0..<k {
-                guard let center = centers[i] else {
-                    continue
-                }
-                let distance = norm(center - x)
-                if distance < max {
-                    max = distance
-                    maxIndex = i
-                }
-            }
-            return maxIndex
-        }
-        return indices
+        let ds = norm(centers.expandDims(0) - x.expandDims(1), along: -1)
+        let indices = argmin(ds, along: 1)
+        
+        return indices.map { Int($0.asScalar()) }
     }
 }
