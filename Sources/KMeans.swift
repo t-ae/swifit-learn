@@ -48,7 +48,7 @@ public class KMeans {
     }
     
     public func predict(x: NDArray) -> [Int] {
-        
+        precondition(x.ndim == 2)
         guard let centers = self.centers else {
             fatalError("Not fitted.")
         }

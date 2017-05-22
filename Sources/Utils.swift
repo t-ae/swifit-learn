@@ -11,19 +11,6 @@ func uniform(low: Int, high: Int) -> Int {
     return Int(arc4random_uniform(UInt32(high - low))) + low
 }
 
-func argsort(_ arg: NDArray, reversed: Bool = false) -> [Int] {
-    precondition(arg.ndim == 1)
-    if !reversed {
-        return arg.enumerated()
-            .sorted { l, r in l.element.asScalar() < r.element.asScalar() }
-            .map { $0.offset }
-    } else {
-        return arg.enumerated()
-            .sorted { l, r in l.element.asScalar() >= r.element.asScalar() }
-            .map { $0.offset }
-    }
-}
-
 func bincount(_ array: [Int]) -> [Int: Int] {
     var bin = [Int: Int]()
     for e in array {

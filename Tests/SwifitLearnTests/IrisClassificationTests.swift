@@ -158,4 +158,53 @@ class IrisClassificationTests: XCTestCase {
         }
     }
 
+    func testDBSCAN() {
+        let db = DBSCAN()
+        
+        let ys = db.fit(x: Iris.x_train)
+        print("numClusters: \(db.numClusters!)")
+        
+        var clusterToClass = [Int: Int]()
+        
+        for i in 0..<3 {
+            let bucket = zip(ys, Iris.y_train).flatMap { $0.0 == i ? Int($0.1.asScalar()) : nil }
+            let mode = bucket.mode()
+            print("Cluster \(i), mode: \(mode)")
+            clusterToClass[i] = mode
+        }
+        
+        do {
+            var correct = 0
+            var missing = 0
+            for (a, b) in zip(ys, Iris.y_train) {
+                guard let a = clusterToClass[a] else {
+                    missing += 1
+                    continue
+                }
+                // print(a, b.asScalar())
+                if a == Int(b.asScalar()) {
+                    correct += 1
+                }
+            }
+            print("accuracy: \(Float(correct) / Float(Iris.y_train.shape[0])) (\(correct)/\(Iris.y_train.shape[0]))")
+            print("missing: \(missing)")
+        }
+        do {
+            let ys = db.predict(x: Iris.x_test)
+            var correct = 0
+            var missing = 0
+            for (a, b) in zip(ys, Iris.y_test) {
+                guard let a = clusterToClass[a] else {
+                    missing += 1
+                    continue
+                }
+                // print(a, b.asScalar())
+                if a == Int(b.asScalar()) {
+                    correct += 1
+                }
+            }
+            print("accuracy: \(Float(correct) / Float(Iris.y_test.shape[0])) (\(correct)/\(Iris.y_test.shape[0]))")
+            print("missing: \(missing)")
+        }
+    }
 }

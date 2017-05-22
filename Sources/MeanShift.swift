@@ -43,7 +43,7 @@ public class MeanShift {
         let dd = d - bandwidth
         let counts = sum(dd.clipped(low: 0) / dd, along: 1)
         
-        let sortedCenters = allCenters.select(argsort(counts, reversed: true))
+        let sortedCenters = allCenters.select(argsort(counts, ascending: false))
         
         var mask = [Bool](repeating: true, count: sortedCenters.shape[0])
         for i in 0..<mask.count-1 {
@@ -74,6 +74,7 @@ public class MeanShift {
     }
     
     public func predict(x: NDArray) -> [Int] {
+        precondition(x.ndim == 2)
         guard let centers = self.centers else {
             fatalError("Not fitted.")
         }
