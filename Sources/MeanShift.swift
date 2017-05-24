@@ -7,7 +7,7 @@ public class MeanShift {
     let maxIter: Int
     let clusterAll: Bool
     
-    var centers: NDArray?
+    public internal(set) var centers: NDArray?
     
     public var numClusters: Int? {
         return centers?.shape[0]

@@ -8,7 +8,7 @@ public class DBSCAN {
     
     var corePoints: NDArray?
     var clusters: [Int]?
-    var numClusters: Int?
+    public internal(set) var numClusters: Int?
     
     public init(eps: Float = 0.5, minSamples: Int = 5) {
         self.eps = eps

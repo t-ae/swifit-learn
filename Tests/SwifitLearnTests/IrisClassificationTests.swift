@@ -159,7 +159,7 @@ class IrisClassificationTests: XCTestCase {
     }
 
     func testDBSCAN() {
-        let db = DBSCAN()
+        let db = DBSCAN(eps: 0.6)
         
         let ys = db.fit(x: Iris.x_train)
         print("numClusters: \(db.numClusters!)")

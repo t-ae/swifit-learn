@@ -7,7 +7,7 @@ public class KMeans {
     let k: Int
     let numSteps: Int
     
-    var centers: NDArray?
+    public internal(set) var centers: NDArray?
     
     public init(k: Int, numSteps: Int = 10) {
         precondition(k > 1)
