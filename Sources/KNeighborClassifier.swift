@@ -33,7 +33,7 @@ class KNeighborClassifier {
         guard let sampleX = self.sampleX, let sampleY = self.sampleY else {
             fatalError("Not fitted.")
         }
-        let distances = norm(sampleX.expandDims(0) - x.expandDims(1), along: -1)
+        let distances = vectorNorm(sampleX.expandDims(0) - x.expandDims(1), axis: -1)
         return distances.map { distances in
             let indices = argsort(distances).prefix(k)
             let answers = indices.map { sampleY[$0] }

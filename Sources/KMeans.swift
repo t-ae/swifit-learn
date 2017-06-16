@@ -30,7 +30,7 @@ public class KMeans {
         var lastIndices = NDArray.empty([0])
         
         for _ in 0..<numSteps {
-            let ds = norm(centers.expandDims(0) - x.expandDims(1), along: -1)
+            let ds = vectorNorm(centers.expandDims(0) - x.expandDims(1), axis: -1)
             let indices = argmin(ds, along: 1)
             
             guard lastIndices != indices else {
@@ -53,7 +53,7 @@ public class KMeans {
             fatalError("Not fitted.")
         }
         
-        let ds = norm(centers.expandDims(0) - x.expandDims(1), along: -1)
+        let ds = vectorNorm(centers.expandDims(0) - x.expandDims(1), axis: -1)
         let indices = argmin(ds, along: 1)
         
         return indices.map { Int($0.asScalar()) }

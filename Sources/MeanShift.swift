@@ -29,7 +29,7 @@ public class MeanShift {
             var inCircle = NDArray.empty([0])
             
             for _ in 0..<self.maxIter {
-                let newInCircle = x.select(norm(x - center, along: 1).indices { $0.asScalar() <= bandwidth })
+                let newInCircle = x.select(vectorNorm(x - center, axis: 1).indices { $0.asScalar() <= bandwidth })
                 if newInCircle == inCircle {
                     break
                 }
@@ -39,7 +39,7 @@ public class MeanShift {
             return center
         })
         
-        let d = norm(allCenters.expandDims(1) - x.expandDims(0), along: -1) //  numcenters x numsamples
+        let d = vectorNorm(allCenters.expandDims(1) - x.expandDims(0), axis: -1) //  numcenters x numsamples
         let dd = d - bandwidth
         let counts = sum(dd.clipped(low: 0) / dd, along: 1)
         
@@ -47,7 +47,7 @@ public class MeanShift {
         
         var mask = [Bool](repeating: true, count: sortedCenters.shape[0])
         for i in 0..<mask.count-1 {
-            let distances = norm(sortedCenters[(i+1)...] - sortedCenters[i], along: 1)
+            let distances = vectorNorm(sortedCenters[(i+1)...] - sortedCenters[i], axis: 1)
             let _mask = distances.map { $0.asScalar() > bandwidth }
             for j in i+1..<mask.count {
                 mask[j] = mask[j] && _mask[j-i-1]
@@ -58,7 +58,7 @@ public class MeanShift {
         self.centers = centers
         
         
-        let distances = norm(centers.expandDims(0) - x.expandDims(1), along: -1)
+        let distances = vectorNorm(centers.expandDims(0) - x.expandDims(1), axis: -1)
         if clusterAll {
             return argmin(distances, along: 1).map { Int($0.asScalar()) }
         } else {
@@ -79,7 +79,7 @@ public class MeanShift {
             fatalError("Not fitted.")
         }
         
-        let distances = norm(centers.expandDims(0) - x.expandDims(1), along: -1)
+        let distances = vectorNorm(centers.expandDims(0) - x.expandDims(1), axis: -1)
         if clusterAll {
             return argmin(distances, along: 1).map { Int($0.asScalar()) }
         } else {

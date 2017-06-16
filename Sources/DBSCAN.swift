@@ -18,7 +18,7 @@ public class DBSCAN {
     public func fit(x: NDArray) -> [Int] {
         precondition(x.ndim == 2)
         
-        let distances = norm(x.expandDims(0) - x.expandDims(1), along: -1)
+        let distances = vectorNorm(x.expandDims(0) - x.expandDims(1), axis: -1)
         let d = distances - eps + 2*eps*NDArray.eye(x.shape[0])
         
         let matrix = (copySign(magnitude: NDArray(scalar: 1), sign: d) - 1) / -2
@@ -59,7 +59,7 @@ public class DBSCAN {
         guard let corePoints = self.corePoints, let clusters = self.clusters else {
             fatalError("Not fitted.")
         }
-        let distances = norm(corePoints.expandDims(0) - x.expandDims(1), along: -1)
+        let distances = vectorNorm(corePoints.expandDims(0) - x.expandDims(1), axis: -1)
         
         return distances.map { ds in
             guard let i = ds.indices(where: { $0.asScalar() <= eps }).first else {
