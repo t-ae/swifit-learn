@@ -27,7 +27,7 @@ public class KMeans {
             bucket[i] = xShuffle[i...~>k]
         }
         var centers = NDArray.stack(bucket.values.map { mean($0, along: 0) })
-        var lastIndices = NDArray.empty([0])
+        var lastIndices = NDArray.zeros([0])
         
         for _ in 0..<numSteps {
             let ds = vectorNorm(centers.expandDims(0) - x.expandDims(1), axis: -1)

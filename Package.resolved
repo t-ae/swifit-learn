@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "NDArray",
+        "repositoryURL": "https://github.com/t-ae/ndarray.git",
+        "state": {
+          "branch": null,
+          "revision": "ae3fa979d4bc03cc6041a6495347b9ecfb9a0807",
+          "version": "0.0.14"
+        }
+      },
+      {
+        "package": "Xorswift",
+        "repositoryURL": "https://github.com/t-ae/xorswift.git",
+        "state": {
+          "branch": null,
+          "revision": "18749aa2b800f446fa797c4e930112ac3e1e4cb4",
+          "version": "0.0.10"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

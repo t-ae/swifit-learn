@@ -26,7 +26,7 @@ public class MeanShift {
         
         let allCenters = NDArray.stack(x.map { seed -> NDArray in
             var center = seed
-            var inCircle = NDArray.empty([0])
+            var inCircle = NDArray.zeros([0])
             
             for _ in 0..<self.maxIter {
                 let newInCircle = x.select(vectorNorm(x - center, axis: 1).indices { $0.asScalar() <= bandwidth })
